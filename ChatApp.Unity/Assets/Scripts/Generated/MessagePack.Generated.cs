@@ -252,6 +252,12 @@ namespace MessagePack.Formatters.ChatApp.Shared.MessagePackObjects
 
         public void Serialize(ref MessagePackWriter writer, global::ChatApp.Shared.MessagePackObjects.JoinRequest value, global::MessagePack.MessagePackSerializerOptions options)
         {
+            if (value == null)
+            {
+                writer.WriteNil();
+                return;
+            }
+
             IFormatterResolver formatterResolver = options.Resolver;
             writer.WriteArrayHeader(3);
             formatterResolver.GetFormatterWithVerify<string>().Serialize(ref writer, value.RoomName, options);
@@ -263,7 +269,7 @@ namespace MessagePack.Formatters.ChatApp.Shared.MessagePackObjects
         {
             if (reader.TryReadNil())
             {
-                throw new InvalidOperationException("typecode is null, struct not supported");
+                return null;
             }
 
             options.Security.DepthStep(ref reader);
@@ -294,7 +300,7 @@ namespace MessagePack.Formatters.ChatApp.Shared.MessagePackObjects
                 }
             }
 
-            var ____result = new global::ChatApp.Shared.MessagePackObjects.JoinRequest();
+            var ____result = new global::ChatApp.Shared.MessagePackObjects.JoinRequest(__RoomName__, __RoomID__, __player__);
             ____result.RoomName = __RoomName__;
             ____result.RoomID = __RoomID__;
             ____result.player = __player__;

@@ -81,12 +81,13 @@ namespace MagicOnion.Resolvers
 
         static MagicOnionResolverGetFormatterHelper()
         {
-            lookup = new global::System.Collections.Generic.Dictionary<Type, int>(4)
+            lookup = new global::System.Collections.Generic.Dictionary<Type, int>(5)
             {
                 {typeof(global::MagicOnion.DynamicArgumentTuple<global::System.Collections.Generic.List<int>, global::System.Collections.Generic.Dictionary<int, string>>), 0 },
                 {typeof(global::MagicOnion.DynamicArgumentTuple<string, global::ChatApp.Shared.MessagePackObjects.E2V>), 1 },
                 {typeof(global::System.Collections.Generic.Dictionary<int, string>), 2 },
-                {typeof(global::System.Collections.Generic.List<int>), 3 },
+                {typeof(global::System.Collections.Generic.List<global::ChatApp.Shared.MessagePackObjects.Room>), 3 },
+                {typeof(global::System.Collections.Generic.List<int>), 4 },
             };
         }
 
@@ -103,7 +104,8 @@ namespace MagicOnion.Resolvers
                 case 0: return new global::MagicOnion.DynamicArgumentTupleFormatter<global::System.Collections.Generic.List<int>, global::System.Collections.Generic.Dictionary<int, string>>(default(global::System.Collections.Generic.List<int>), default(global::System.Collections.Generic.Dictionary<int, string>));
                 case 1: return new global::MagicOnion.DynamicArgumentTupleFormatter<string, global::ChatApp.Shared.MessagePackObjects.E2V>(default(string), default(global::ChatApp.Shared.MessagePackObjects.E2V));
                 case 2: return new global::MessagePack.Formatters.DictionaryFormatter<int, string>();
-                case 3: return new global::MessagePack.Formatters.ListFormatter<int>();
+                case 3: return new global::MessagePack.Formatters.ListFormatter<global::ChatApp.Shared.MessagePackObjects.Room>();
+                case 4: return new global::MessagePack.Formatters.ListFormatter<int>();
                 default: return null;
             }
         }
@@ -261,8 +263,8 @@ namespace ChatApp.Shared.Hubs {
                 }
                 case 860157199: // OnCreateRoom
                 {
-                    var result = MessagePackSerializer.Deserialize<Nil>(data, serializerOptions);
-                    receiver.OnCreateRoom(); break;
+                    var result = MessagePackSerializer.Deserialize<global::System.Collections.Generic.List<global::ChatApp.Shared.MessagePackObjects.Room>>(data, serializerOptions);
+                    receiver.OnCreateRoom(result); break;
                 }
                 case 532410095: // OnLeave
                 {
