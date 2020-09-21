@@ -9,11 +9,11 @@ namespace ChatApp.Shared.Hubs
     public interface IChatHubReceiver
     {
         //void OnLogin();
-        void OnJoin(string name,E2V dict);
+        void OnJoin(string name);
 
-        void OnCreateRoom(List<Room> lstRoom);
+        void OnCreateRoom(Room room);
 
-        void OnLeave(string name);
+        void OnLeave(Player player);
 
         void OnSendMessage(MessageResponse message);
     }

@@ -14,7 +14,7 @@ namespace ChatApp.Server
         static async Task Main(string[] args)
         {
             //GrpcEnvironment.SetLogger(new Grpc.Core.Logging.ConsoleLogger());
-
+            Global.Loaddict();
             await MagicOnionHost.CreateDefaultBuilder()
                 .UseMagicOnion()
                 .RunConsoleAsync();

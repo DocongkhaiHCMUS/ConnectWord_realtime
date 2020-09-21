@@ -49,28 +49,25 @@ namespace ChatApp.DL
         /// <param name="param">parameters for procedure</param>
         /// <returns>DataTable</returns>
 
-        public Task<DataTable> Select(CommandType type, string sql, params MySqlParameter[] param)
+        public DataTable Select(CommandType type, string sql, params MySqlParameter[] param)
         {
-            return Task.Run(() =>
+            try
             {
-                try
-                {
-                    MySqlCommand sqlCommand = Connection.CreateCommand();
-                    sqlCommand.CommandType = type;
-                    sqlCommand.CommandText = sql;
-                    if (param != null && param.Length > 0)
-                        sqlCommand.Parameters.AddRange(param);
+                MySqlCommand sqlCommand = Connection.CreateCommand();
+                sqlCommand.CommandType = type;
+                sqlCommand.CommandText = sql;
+                if (param != null && param.Length > 0)
+                    sqlCommand.Parameters.AddRange(param);
 
-                    MySqlDataAdapter sqlData = new MySqlDataAdapter(sqlCommand);
-                    DataTable table = new DataTable();
-                    sqlData.Fill(table);
-                    return table;
-                }
-                catch (MySqlException ex)
-                {
-                    throw ex;
-                }
-            });
+                MySqlDataAdapter sqlData = new MySqlDataAdapter(sqlCommand);
+                DataTable table = new DataTable();
+                sqlData.Fill(table);
+                return table;
+            }
+            catch (MySqlException ex)
+            {
+                throw ex;
+            }
         }
 
         /// <summary>
@@ -80,27 +77,25 @@ namespace ChatApp.DL
         /// <param name="sql">query string</param>
         /// <param name="param">parameters for procedure</param>
         /// <returns>int</returns>
-        public Task<int> ExeCuteNonQuery(CommandType type, string sql, params MySqlParameter[] param)
+        public int ExeCuteNonQuery(CommandType type, string sql, params MySqlParameter[] param)
         {
-            return Task.Run(() =>
+
+            try
             {
-                try
-                {
-                    MySqlCommand sqlCommand = Connection.CreateCommand();
-                    sqlCommand.CommandType = type;
-                    sqlCommand.CommandText = sql;
+                MySqlCommand sqlCommand = Connection.CreateCommand();
+                sqlCommand.CommandType = type;
+                sqlCommand.CommandText = sql;
 
-                    if (param != null && param.Length > 0)
-                        sqlCommand.Parameters.AddRange(param);
+                if (param != null && param.Length > 0)
+                    sqlCommand.Parameters.AddRange(param);
 
-                    int nRow = sqlCommand.ExecuteNonQuery();
-                    return nRow;
-                }
-                catch (MySqlException ex)
-                {
-                    throw ex;
-                }
-            });
+                int nRow = sqlCommand.ExecuteNonQuery();
+                return nRow;
+            }
+            catch (MySqlException ex)
+            {
+                throw ex;
+            }
         }
     }
 }

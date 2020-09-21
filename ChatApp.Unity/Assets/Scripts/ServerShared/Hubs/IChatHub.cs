@@ -10,19 +10,17 @@ namespace ChatApp.Shared.Hubs
     /// </summary>
     public interface IChatHub : IStreamingHub<IChatHub, IChatHubReceiver>
     {
-        List<Room> LoadRoom();
-        Task CreateRoom(JoinRequest request);
-        Task JoinAsync(JoinRequest request);
+        //Task<Room[]> LoadRoom();
+        Task<Room[]> CreateRoom(JoinRequest request);
+        Task<Player[]> JoinAsync(JoinRequest request);
 
-        Task startGame();
-
-        Task LeaveAsync(JoinRequest request);
+        Task LeaveAsync();
 
         Task SendMessageAsync(Answer answer);
 
         Task GenerateException(string message);
 
-        // It is not called because it is a method as a sample of arguments.
-        Task SampleMethod(List<int> sampleList, Dictionary<int, string> sampleDictionary);
+        //// It is not called because it is a method as a sample of arguments.
+        //Task SampleMethod(List<int> sampleList, Dictionary<int, string> sampleDictionary);
     }
 }

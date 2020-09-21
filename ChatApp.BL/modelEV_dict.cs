@@ -15,7 +15,7 @@ namespace ChatApp.BL
         /// <summary>
         /// load dictionary English-Vietnamese
         /// </summary>
-        public static async Task<List<E2V>> loadDictionary()
+        public static List<E2V> loadDictionary()
         {
             Provider dl = new Provider();
             List<E2V> rs = new List<E2V>();
@@ -26,7 +26,7 @@ namespace ChatApp.BL
                 dl.Connect();
 
                 CommandType type = CommandType.Text;
-                DataTable dataTable = await dl.Select(type, sql);
+                DataTable dataTable = dl.Select(type, sql);
 
                 for (int i = 0; i < dataTable.Rows.Count; i++)
                 {

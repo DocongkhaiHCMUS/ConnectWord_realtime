@@ -54,7 +54,7 @@ namespace Assets.Scripts
         }
 
 
-        private void InitializeClient()
+        private async void InitializeClient()
         {
             // Initialize the Hub
             this.channel = new Channel("localhost", 3000, ChannelCredentials.Insecure);
@@ -115,6 +115,11 @@ namespace Assets.Scripts
             this.ExceptionButton.interactable = false;
             this.UnaryExceptionButton.interactable = false;
 
+            //var request = new JoinRequest("A","1",new Player("1","Kai",0));
+            //await this.streamingClient.CreateRoom(request);
+
+            this.InitializeUi();
+
             if (this.isJoin)
                 this.JoinOrLeave();
 
@@ -172,15 +177,14 @@ namespace Assets.Scripts
         {
             if (this.isJoin)
             {
-                var request = new JoinRequest ();
-                await this.streamingClient.LeaveAsync(request);
-
+                await this.streamingClient.LeaveAsync();
                 this.InitializeUi();
             }
             else
             {
-                var request = new JoinRequest ();
-                await this.streamingClient.JoinAsync(request);
+                var request = new JoinRequest("A", "1", new Player("1", "Kai123", 0));
+                Player [] listPlayer = await this.streamingClient.JoinAsync(request);
+                Debug.Log(listPlayer.Length);
 
                 this.isJoin = true;
                 this.SendMessageButton.interactable = true;
@@ -224,16 +228,16 @@ namespace Assets.Scripts
         //    Debug.Log(dict);
         //}
 
-        public void OnJoin(string name, E2V dict)
+        public void OnJoin(string name)
         {
             this.ChatText.text += $"\n<color=grey>{name} entered the room .</color>";
-            Debug.Log(dict.word);
+            //Debug.Log(dict.word);
         }
 
 
-        public void OnLeave(string name)
+        public void OnLeave(Player player)
         {
-            this.ChatText.text += $"\n<color=grey>{name} left the room.</color>";
+            this.ChatText.text += $"\n<color=grey>{player.userName} left the room.</color>";
         }
 
         public void OnSendMessage(MessageResponse message)
@@ -260,6 +264,11 @@ namespace Assets.Scripts
         public void OnCreateRoom(List<Room> lstRoom)
         {
             throw new System.NotImplementedException();
+        }
+
+        public void OnCreateRoom(Room room)
+        {
+            Debug.Log(room.roomName);
         }
         #endregion
     }

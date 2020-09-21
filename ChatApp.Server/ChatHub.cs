@@ -4,6 +4,7 @@ using ChatApp.Shared.MessagePackObjects;
 using MagicOnion.Server.Hubs;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace ChatApp.Server
@@ -14,66 +15,45 @@ namespace ChatApp.Server
     /// </summary>
     public class ChatHub : StreamingHubBase<IChatHub, IChatHubReceiver>, IChatHub
     {
-        //private IGroup curIGRoom;
-        //private string myName;
-        public List<Room> LoadRoom()
-        {
-            return Global.listRoom;
-        }
+        private IGroup room;
+        private Player self;
+        private IInMemoryStorage<Player> storage;
 
-        public async Task CreateRoom(JoinRequest request)
+        public async Task<Room[]> CreateRoom(JoinRequest request)
         {
             string roomID = Global.listRoom.Count.ToString();
             Room newRoom = new Room(roomID, request.RoomName, request.player.userID, 20);
-            IGroup newIGRoom = await this.Group.AddAsync(request.RoomName);
+            room = await this.Group.AddAsync(request.RoomName);
 
             Global.listRoom.Add(newRoom);
-            Global.mapRoom.Add(roomID, newIGRoom);
+            Global.mapRoom.Add(roomID, room);
 
-            this.Broadcast(newIGRoom).OnCreateRoom(Global.listRoom);
+            this.Broadcast(room).OnCreateRoom(newRoom);
+
+            return Global.listRoom.ToArray();
         }
 
-        public async Task startGame()
+        public async Task<Player[]> JoinAsync(JoinRequest request)
         {
-            await modelEV_dict.loadDictionary();
+            self = new Player(request.player);
+
+            // Group can bundle many connections and it has inmemory-storage so add any type per group. 
+            (room, storage) = await Group.AddAsync(request.RoomID, self);
+
+            // Typed Server->Client broadcast.
+            Broadcast(room).OnJoin(request.player.userName);
+
+            return storage.AllValues.ToArray();
         }
 
-        public async Task JoinAsync(JoinRequest request)
+        public async Task LeaveAsync()
         {
-            IGroup curIGRoom = Global.mapRoom[request.RoomID];
-            int index = int.Parse(request.RoomID);
-            Room curRoom = Global.listRoom[index];
-
-            curRoom.lstPlayer.Add(new Player(request.player));
-
-            //this.room = await this.Group.AddAsync(request.RoomName);
-            //this.myName = request.player.userName;
-
-            this.Broadcast(curIGRoom).OnJoin(request.player.userName, Global.dict[0]);
-            
-        }
-
-        public async Task LeaveAsync(JoinRequest request)
-        {
-            IGroup curIGRoom = Global.mapRoom[request.RoomID];
-            int index = int.Parse(request.RoomID);
-            Room curRoom = Global.listRoom[index];
-
-            //await curIGRoom.RemoveAsync(this.Context);
-            curRoom.lstPlayer.Remove(request.player);
-
-            this.Broadcast(curIGRoom).OnLeave(request.player.userName);
+            await room.RemoveAsync(this.Context);
+            Broadcast(room).OnLeave(self);
         }
 
         public async Task SendMessageAsync(Answer answer)
         {
-            IGroup curIGRoom = Global.mapRoom[answer.Room_ID];
-            int index = int.Parse(answer.Room_ID);
-            Room curRoom = Global.listRoom[index];
-
-            curRoom.List_answer.Add(new Answer(answer));
-            this.Broadcast(curIGRoom).OnSendMessage(new MessageResponse(answer.player.userName,answer.answer));
-
             await Task.CompletedTask;
         }
 
@@ -82,11 +62,11 @@ namespace ChatApp.Server
             throw new Exception(message);
         }
 
-        // It is not called because it is a method as a sample of arguments.
-        public Task SampleMethod(List<int> sampleList, Dictionary<int, string> sampleDictionary)
-        {
-            throw new System.NotImplementedException();
-        }
+        //// It is not called because it is a method as a sample of arguments.
+        //public Task SampleMethod(List<int> sampleList, Dictionary<int, string> sampleDictionary)
+        //{
+        //    throw new System.NotImplementedException();
+        //}
 
         protected override ValueTask OnConnecting()
         {

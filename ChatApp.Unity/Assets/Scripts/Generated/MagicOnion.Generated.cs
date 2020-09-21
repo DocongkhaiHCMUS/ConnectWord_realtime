@@ -81,13 +81,10 @@ namespace MagicOnion.Resolvers
 
         static MagicOnionResolverGetFormatterHelper()
         {
-            lookup = new global::System.Collections.Generic.Dictionary<Type, int>(5)
+            lookup = new global::System.Collections.Generic.Dictionary<Type, int>(2)
             {
-                {typeof(global::MagicOnion.DynamicArgumentTuple<global::System.Collections.Generic.List<int>, global::System.Collections.Generic.Dictionary<int, string>>), 0 },
-                {typeof(global::MagicOnion.DynamicArgumentTuple<string, global::ChatApp.Shared.MessagePackObjects.E2V>), 1 },
-                {typeof(global::System.Collections.Generic.Dictionary<int, string>), 2 },
-                {typeof(global::System.Collections.Generic.List<global::ChatApp.Shared.MessagePackObjects.Room>), 3 },
-                {typeof(global::System.Collections.Generic.List<int>), 4 },
+                {typeof(global::ChatApp.Shared.MessagePackObjects.Player[]), 0 },
+                {typeof(global::ChatApp.Shared.MessagePackObjects.Room[]), 1 },
             };
         }
 
@@ -101,11 +98,8 @@ namespace MagicOnion.Resolvers
 
             switch (key)
             {
-                case 0: return new global::MagicOnion.DynamicArgumentTupleFormatter<global::System.Collections.Generic.List<int>, global::System.Collections.Generic.Dictionary<int, string>>(default(global::System.Collections.Generic.List<int>), default(global::System.Collections.Generic.Dictionary<int, string>));
-                case 1: return new global::MagicOnion.DynamicArgumentTupleFormatter<string, global::ChatApp.Shared.MessagePackObjects.E2V>(default(string), default(global::ChatApp.Shared.MessagePackObjects.E2V));
-                case 2: return new global::MessagePack.Formatters.DictionaryFormatter<int, string>();
-                case 3: return new global::MessagePack.Formatters.ListFormatter<global::ChatApp.Shared.MessagePackObjects.Room>();
-                case 4: return new global::MessagePack.Formatters.ListFormatter<int>();
+                case 0: return new global::MessagePack.Formatters.ArrayFormatter<global::ChatApp.Shared.MessagePackObjects.Player>();
+                case 1: return new global::MessagePack.Formatters.ArrayFormatter<global::ChatApp.Shared.MessagePackObjects.Room>();
                 default: return null;
             }
         }
@@ -258,17 +252,17 @@ namespace ChatApp.Shared.Hubs {
             {
                 case -1297457280: // OnJoin
                 {
-                    var result = MessagePackSerializer.Deserialize<DynamicArgumentTuple<string, global::ChatApp.Shared.MessagePackObjects.E2V>>(data, serializerOptions);
-                    receiver.OnJoin(result.Item1, result.Item2); break;
+                    var result = MessagePackSerializer.Deserialize<string>(data, serializerOptions);
+                    receiver.OnJoin(result); break;
                 }
                 case 860157199: // OnCreateRoom
                 {
-                    var result = MessagePackSerializer.Deserialize<global::System.Collections.Generic.List<global::ChatApp.Shared.MessagePackObjects.Room>>(data, serializerOptions);
+                    var result = MessagePackSerializer.Deserialize<global::ChatApp.Shared.MessagePackObjects.Room>(data, serializerOptions);
                     receiver.OnCreateRoom(result); break;
                 }
                 case 532410095: // OnLeave
                 {
-                    var result = MessagePackSerializer.Deserialize<string>(data, serializerOptions);
+                    var result = MessagePackSerializer.Deserialize<global::ChatApp.Shared.MessagePackObjects.Player>(data, serializerOptions);
                     receiver.OnLeave(result); break;
                 }
                 case -552695459: // OnSendMessage
@@ -285,28 +279,16 @@ namespace ChatApp.Shared.Hubs {
         {
             switch (methodId)
             {
-                case -1389867978: // LoadRoom
-                {
-                    var result = MessagePackSerializer.Deserialize<global::ChatApp.Shared.MessagePackObjects.Room>(data, serializerOptions);
-                    ((TaskCompletionSource<global::ChatApp.Shared.MessagePackObjects.Room>)taskCompletionSource).TrySetResult(result);
-                    break;
-                }
                 case -9235358: // CreateRoom
                 {
-                    var result = MessagePackSerializer.Deserialize<Nil>(data, serializerOptions);
-                    ((TaskCompletionSource<Nil>)taskCompletionSource).TrySetResult(result);
+                    var result = MessagePackSerializer.Deserialize<global::ChatApp.Shared.MessagePackObjects.Room[]>(data, serializerOptions);
+                    ((TaskCompletionSource<global::ChatApp.Shared.MessagePackObjects.Room[]>)taskCompletionSource).TrySetResult(result);
                     break;
                 }
                 case -733403293: // JoinAsync
                 {
-                    var result = MessagePackSerializer.Deserialize<Nil>(data, serializerOptions);
-                    ((TaskCompletionSource<Nil>)taskCompletionSource).TrySetResult(result);
-                    break;
-                }
-                case -502324651: // startGame
-                {
-                    var result = MessagePackSerializer.Deserialize<Nil>(data, serializerOptions);
-                    ((TaskCompletionSource<Nil>)taskCompletionSource).TrySetResult(result);
+                    var result = MessagePackSerializer.Deserialize<global::ChatApp.Shared.MessagePackObjects.Player[]>(data, serializerOptions);
+                    ((TaskCompletionSource<global::ChatApp.Shared.MessagePackObjects.Player[]>)taskCompletionSource).TrySetResult(result);
                     break;
                 }
                 case 1368362116: // LeaveAsync
@@ -327,40 +309,24 @@ namespace ChatApp.Shared.Hubs {
                     ((TaskCompletionSource<Nil>)taskCompletionSource).TrySetResult(result);
                     break;
                 }
-                case -852153394: // SampleMethod
-                {
-                    var result = MessagePackSerializer.Deserialize<Nil>(data, serializerOptions);
-                    ((TaskCompletionSource<Nil>)taskCompletionSource).TrySetResult(result);
-                    break;
-                }
                 default:
                     break;
             }
         }
    
-        public global::System.Collections.Generic.List<global::ChatApp.Shared.MessagePackObjects.Room> LoadRoom()
+        public global::System.Threading.Tasks.Task<global::ChatApp.Shared.MessagePackObjects.Room[]> CreateRoom(global::ChatApp.Shared.MessagePackObjects.JoinRequest request)
         {
-            return WriteMessageWithResponseAsync<Nil, global::ChatApp.Shared.MessagePackObjects.Room> (-1389867978, Nil.Default);
+            return WriteMessageWithResponseAsync<global::ChatApp.Shared.MessagePackObjects.JoinRequest, global::ChatApp.Shared.MessagePackObjects.Room[]> (-9235358, request);
         }
 
-        public global::System.Threading.Tasks.Task CreateRoom(global::ChatApp.Shared.MessagePackObjects.JoinRequest request)
+        public global::System.Threading.Tasks.Task<global::ChatApp.Shared.MessagePackObjects.Player[]> JoinAsync(global::ChatApp.Shared.MessagePackObjects.JoinRequest request)
         {
-            return WriteMessageWithResponseAsync<global::ChatApp.Shared.MessagePackObjects.JoinRequest, Nil>(-9235358, request);
+            return WriteMessageWithResponseAsync<global::ChatApp.Shared.MessagePackObjects.JoinRequest, global::ChatApp.Shared.MessagePackObjects.Player[]> (-733403293, request);
         }
 
-        public global::System.Threading.Tasks.Task JoinAsync(global::ChatApp.Shared.MessagePackObjects.JoinRequest request)
+        public global::System.Threading.Tasks.Task LeaveAsync()
         {
-            return WriteMessageWithResponseAsync<global::ChatApp.Shared.MessagePackObjects.JoinRequest, Nil>(-733403293, request);
-        }
-
-        public global::System.Threading.Tasks.Task startGame()
-        {
-            return WriteMessageWithResponseAsync<Nil, Nil>(-502324651, Nil.Default);
-        }
-
-        public global::System.Threading.Tasks.Task LeaveAsync(global::ChatApp.Shared.MessagePackObjects.JoinRequest request)
-        {
-            return WriteMessageWithResponseAsync<global::ChatApp.Shared.MessagePackObjects.JoinRequest, Nil>(1368362116, request);
+            return WriteMessageWithResponseAsync<Nil, Nil>(1368362116, Nil.Default);
         }
 
         public global::System.Threading.Tasks.Task SendMessageAsync(global::ChatApp.Shared.MessagePackObjects.Answer answer)
@@ -371,11 +337,6 @@ namespace ChatApp.Shared.Hubs {
         public global::System.Threading.Tasks.Task GenerateException(string message)
         {
             return WriteMessageWithResponseAsync<string, Nil>(517938971, message);
-        }
-
-        public global::System.Threading.Tasks.Task SampleMethod(global::System.Collections.Generic.List<int> sampleList, global::System.Collections.Generic.Dictionary<int, string> sampleDictionary)
-        {
-            return WriteMessageWithResponseAsync<DynamicArgumentTuple<global::System.Collections.Generic.List<int>, global::System.Collections.Generic.Dictionary<int, string>>, Nil>(-852153394, new DynamicArgumentTuple<global::System.Collections.Generic.List<int>, global::System.Collections.Generic.Dictionary<int, string>>(sampleList, sampleDictionary));
         }
 
 
@@ -403,29 +364,19 @@ namespace ChatApp.Shared.Hubs {
                 throw new NotSupportedException();
             }
 
-            public global::System.Collections.Generic.List<global::ChatApp.Shared.MessagePackObjects.Room> LoadRoom()
+            public global::System.Threading.Tasks.Task<global::ChatApp.Shared.MessagePackObjects.Room[]> CreateRoom(global::ChatApp.Shared.MessagePackObjects.JoinRequest request)
             {
-                return __parent.WriteMessageAsyncFireAndForget<Nil, global::ChatApp.Shared.MessagePackObjects.Room> (-1389867978, Nil.Default);
+                return __parent.WriteMessageAsyncFireAndForget<global::ChatApp.Shared.MessagePackObjects.JoinRequest, global::ChatApp.Shared.MessagePackObjects.Room[]> (-9235358, request);
             }
 
-            public global::System.Threading.Tasks.Task CreateRoom(global::ChatApp.Shared.MessagePackObjects.JoinRequest request)
+            public global::System.Threading.Tasks.Task<global::ChatApp.Shared.MessagePackObjects.Player[]> JoinAsync(global::ChatApp.Shared.MessagePackObjects.JoinRequest request)
             {
-                return __parent.WriteMessageAsync<global::ChatApp.Shared.MessagePackObjects.JoinRequest>(-9235358, request);
+                return __parent.WriteMessageAsyncFireAndForget<global::ChatApp.Shared.MessagePackObjects.JoinRequest, global::ChatApp.Shared.MessagePackObjects.Player[]> (-733403293, request);
             }
 
-            public global::System.Threading.Tasks.Task JoinAsync(global::ChatApp.Shared.MessagePackObjects.JoinRequest request)
+            public global::System.Threading.Tasks.Task LeaveAsync()
             {
-                return __parent.WriteMessageAsync<global::ChatApp.Shared.MessagePackObjects.JoinRequest>(-733403293, request);
-            }
-
-            public global::System.Threading.Tasks.Task startGame()
-            {
-                return __parent.WriteMessageAsync<Nil>(-502324651, Nil.Default);
-            }
-
-            public global::System.Threading.Tasks.Task LeaveAsync(global::ChatApp.Shared.MessagePackObjects.JoinRequest request)
-            {
-                return __parent.WriteMessageAsync<global::ChatApp.Shared.MessagePackObjects.JoinRequest>(1368362116, request);
+                return __parent.WriteMessageAsync<Nil>(1368362116, Nil.Default);
             }
 
             public global::System.Threading.Tasks.Task SendMessageAsync(global::ChatApp.Shared.MessagePackObjects.Answer answer)
@@ -436,11 +387,6 @@ namespace ChatApp.Shared.Hubs {
             public global::System.Threading.Tasks.Task GenerateException(string message)
             {
                 return __parent.WriteMessageAsync<string>(517938971, message);
-            }
-
-            public global::System.Threading.Tasks.Task SampleMethod(global::System.Collections.Generic.List<int> sampleList, global::System.Collections.Generic.Dictionary<int, string> sampleDictionary)
-            {
-                return __parent.WriteMessageAsync<DynamicArgumentTuple<global::System.Collections.Generic.List<int>, global::System.Collections.Generic.Dictionary<int, string>>>(-852153394, new DynamicArgumentTuple<global::System.Collections.Generic.List<int>, global::System.Collections.Generic.Dictionary<int, string>>(sampleList, sampleDictionary));
             }
 
         }
